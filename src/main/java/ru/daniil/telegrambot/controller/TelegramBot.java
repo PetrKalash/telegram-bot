@@ -1,6 +1,7 @@
 package ru.daniil.telegrambot.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -12,6 +13,8 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.daniil.telegrambot.components.BotCommands;
 import ru.daniil.telegrambot.config.BotConfig;
+import ru.daniil.telegrambot.service.DomainService;
+import ru.daniil.telegrambot.service.MessageService;
 import ru.daniil.telegrambot.service.UserService;
 
 @Slf4j
@@ -20,10 +23,19 @@ import ru.daniil.telegrambot.service.UserService;
 public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
     private final BotConfig botConfig;
     private final UserService userService;
+    private final MessageService messageService;
+    private final DomainService domainService;
 
-    public TelegramBot(BotConfig botConfig, UserService userService) {
+    @Autowired
+    public TelegramBot(BotConfig botConfig,
+                       UserService userService,
+                       MessageService messageService,
+                       DomainService domainService)
+    {
         this.botConfig = botConfig;
         this.userService = userService;
+        this.messageService = messageService;
+        this.domainService = domainService;
         try {
             this.execute(new SetMyCommands(BOT_COMMAND_LIST, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
@@ -54,25 +66,35 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
             receivedMessage = infoMessage.getText();
         }
 
-        botAnswerUtils(chatId, firstName, receivedMessage);
+        botAnswerUtils(infoMessage, chatId, firstName, receivedMessage);
     }
 
-    private void botAnswerUtils(long chatId, String firstName, String receivedMessage) {
+    private void botAnswerUtils(Message infoMessage, Long chatId, String firstName, String receivedMessage) {
         switch (receivedMessage) {
             case "/start":
-                // registerUser(update.getMessage());
+                createUser(infoMessage);
                 startBot(chatId, firstName);
                 break;
             case "/get":
+                createDomain();
                 break;
             default:
                 sendMessage(chatId, DEFAULT_TEXT);
                 break;
         }
+        createMessage(infoMessage);
     }
 
-    private void registerUser(Message message) {
-        userService.createUser(message);
+    private void createUser(Message infoMessage) {
+        userService.createUser(infoMessage);
+    }
+
+    private void createDomain() {
+        domainService.createDomain();
+    }
+
+    private void createMessage(Message infoMessage) {
+        messageService.createMessage(infoMessage);
     }
 
     private void startBot(long chatId, String firstName) {

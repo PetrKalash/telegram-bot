@@ -1,14 +1,16 @@
 package ru.daniil.telegrambot.models;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import lombok.Data;
 
+import javax.persistence.*;
+
+@Data
 @Entity(name = "messages")
 public class Message {
     @Id
-    @GeneratedValue
     private Integer id;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    private User user;
     private String question;
     private String answer;
 }
