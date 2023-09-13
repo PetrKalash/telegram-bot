@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-message
+      author: Neshkov
+      changes:
+        - createTable:
+            tableName: messages
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_chat_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: user_article
+                    referencedTableName: users
+                    referencedColumnNames: chat_id
+              - column:
+                  name: question
+                  type: character varying(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: answer
+                  type: character varying(255)
+                  constraints:
+                    nullable: true

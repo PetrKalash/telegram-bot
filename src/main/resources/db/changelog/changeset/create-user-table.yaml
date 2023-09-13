@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-user
+      author: Neshkov
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: chat_id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: character varying(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_message_at
+                  type: timestamp without time zone
+                  constraints:
+                    nullable: false

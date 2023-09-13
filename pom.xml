@@ -22,6 +22,7 @@
         <lombok.version>1.18.24</lombok.version>
         <jackson.version>2.15.2</jackson.version>
         <unirest.version>1.4.9</unirest.version>
+        <liquibase.version>4.23.2</liquibase.version>
     </properties>
 
     <dependencies>
@@ -51,6 +52,12 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.liquibase/liquibase-core -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.mashape.unirest/unirest-java -->
