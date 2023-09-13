@@ -59,7 +59,6 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
         long chatId = 0;
         String firstName = "";
         String receivedMessage = "";
-        SendMessage answer = null;
 
         Message infoMessage = update.getMessage();
         if (update.hasMessage() && infoMessage.hasText()) {
@@ -68,10 +67,11 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
             receivedMessage = infoMessage.getText();
         }
 
-        botAnswerUtils(infoMessage, chatId, firstName, receivedMessage, answer);
+        botAnswerUtils(infoMessage, chatId, firstName, receivedMessage);
     }
 
-    private void botAnswerUtils(Message infoMessage, Long chatId, String firstName, String receivedMessage, SendMessage answer) {
+    private void botAnswerUtils(Message infoMessage, Long chatId, String firstName, String receivedMessage) {
+        SendMessage answer = null;
         switch (receivedMessage) {
             case "/start":
                 createUser(infoMessage);
@@ -83,7 +83,7 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
                 answer = sendMessage(chatId, DEFAULT_TEXT);
                 break;
         }
-        createMessage(infoMessage, userService.getUser(chatId).get(), answer);
+        createMessage(infoMessage, userService.getUser(chatId), answer);
     }
 
     private void createUser(Message infoMessage) {

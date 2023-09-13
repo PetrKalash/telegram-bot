@@ -9,7 +9,6 @@ import ru.daniil.telegrambot.models.User;
 import ru.daniil.telegrambot.repository.UserRepository;
 
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 @Component
@@ -35,7 +34,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getUser(Long chatId) {
-        return userRepository.findById(chatId);
+    public User getUser(Long chatId) {
+        return userRepository.findById(chatId).orElse(null);
     }
 }
