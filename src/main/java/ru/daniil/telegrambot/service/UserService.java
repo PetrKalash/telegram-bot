@@ -9,6 +9,7 @@ import ru.daniil.telegrambot.models.User;
 import ru.daniil.telegrambot.repository.UserRepository;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @Component
@@ -28,5 +29,13 @@ public class UserService {
         user.setLastMessageAt(new Date());
         userRepository.save(user);
         log.info("User save: " + user);
+    }
+
+    public Iterable<User> getAllUser() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> getUser(Long chatId) {
+        return userRepository.findById(chatId);
     }
 }

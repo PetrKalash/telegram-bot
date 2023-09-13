@@ -9,7 +9,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.extern.slf4j.Slf4j;
 import org.jvnet.hk2.annotations.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.daniil.telegrambot.models.Domain;
 import ru.daniil.telegrambot.repository.DomainRepository;
@@ -25,6 +24,7 @@ public class DomainService {
     private static final String LINK_TO_DOMAINS =
             "https://backorder.ru/json/?order=desc&expired=1&by=hotness&page=1&item";
     private final DomainRepository domainRepository;
+    private List<Domain> domainsList;
 
     @Autowired
     public DomainService(DomainRepository domainRepository) {
@@ -40,21 +40,23 @@ public class DomainService {
             throw new RuntimeException(e);
         }
         try {
-            return new ObjectMapper().readValue(response.getBody(), new TypeReference<>() {
-            });
+            return new ObjectMapper().readValue(response.getBody(), new TypeReference<>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void createDomain() {
-        List<Domain> domainsList = getDomain();
+        domainsList = getDomain();
         domainRepository.saveAll(domainsList);
-        mailingDomain(domainsList);
     }
 
-    public void mailingDomain(List<Domain> domainList) {
-        System.out.println(DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDateTime.now()) +
-                " Cобрано " + domainList.size() + " доменов");
+    public void clearDomain() {
+        domainRepository.deleteAll();
+    }
+
+    public String mailingDomain() {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDateTime.now()) +
+                " Cобрано " + domainsList.size() + " доменов";
     }
 }

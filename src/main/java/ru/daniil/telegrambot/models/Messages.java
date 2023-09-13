@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 @Data
 @Entity(name = "messages")
-public class Message {
+public class Messages {
     @Id
     private Integer id;
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)

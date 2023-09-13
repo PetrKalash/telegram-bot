@@ -2,6 +2,7 @@ package ru.daniil.telegrambot.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.daniil.telegrambot.components.BotCommands;
 import ru.daniil.telegrambot.config.BotConfig;
+import ru.daniil.telegrambot.models.User;
 import ru.daniil.telegrambot.service.DomainService;
 import ru.daniil.telegrambot.service.MessageService;
 import ru.daniil.telegrambot.service.UserService;
@@ -30,8 +32,7 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
     public TelegramBot(BotConfig botConfig,
                        UserService userService,
                        MessageService messageService,
-                       DomainService domainService)
-    {
+                       DomainService domainService) {
         this.botConfig = botConfig;
         this.userService = userService;
         this.messageService = messageService;
@@ -58,6 +59,7 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
         long chatId = 0;
         String firstName = "";
         String receivedMessage = "";
+        SendMessage answer = null;
 
         Message infoMessage = update.getMessage();
         if (update.hasMessage() && infoMessage.hasText()) {
@@ -66,43 +68,38 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
             receivedMessage = infoMessage.getText();
         }
 
-        botAnswerUtils(infoMessage, chatId, firstName, receivedMessage);
+        botAnswerUtils(infoMessage, chatId, firstName, receivedMessage, answer);
     }
 
-    private void botAnswerUtils(Message infoMessage, Long chatId, String firstName, String receivedMessage) {
+    private void botAnswerUtils(Message infoMessage, Long chatId, String firstName, String receivedMessage, SendMessage answer) {
         switch (receivedMessage) {
             case "/start":
                 createUser(infoMessage);
-                startBot(chatId, firstName);
+                answer = startBot(chatId, firstName);
                 break;
             case "/get":
-                createDomain();
                 break;
             default:
-                sendMessage(chatId, DEFAULT_TEXT);
+                answer = sendMessage(chatId, DEFAULT_TEXT);
                 break;
         }
-        createMessage(infoMessage);
+        createMessage(infoMessage, userService.getUser(chatId).get(), answer);
     }
 
     private void createUser(Message infoMessage) {
         userService.createUser(infoMessage);
     }
 
-    private void createDomain() {
-        domainService.createDomain();
+    private void createMessage(Message infoMessage, User user, SendMessage answer) {
+        messageService.createMessage(infoMessage, user, answer);
     }
 
-    private void createMessage(Message infoMessage) {
-        messageService.createMessage(infoMessage);
-    }
-
-    private void startBot(long chatId, String firstName) {
-        sendMessage(chatId, (firstName + START_TEXT));
+    private SendMessage startBot(long chatId, String firstName) {
         log.info("Replied to user: " + firstName);
+        return sendMessage(chatId, (firstName + START_TEXT));
     }
 
-    private void sendMessage(long chatId, String message) {
+    private SendMessage sendMessage(long chatId, String message) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(message);
@@ -110,6 +107,21 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Error: " + e.getMessage());
+        }
+        return sendMessage;
+    }
+
+    @Scheduled(cron = "${cron.scheduler}")
+    private void createDomain() {
+        domainService.clearDomain();
+        domainService.createDomain();
+        mailingDomain();
+    }
+
+    private void mailingDomain() {
+        var users = userService.getAllUser();
+        for (User user : users) {
+            sendMessage(user.getChatId(), domainService.mailingDomain());
         }
     }
 }
