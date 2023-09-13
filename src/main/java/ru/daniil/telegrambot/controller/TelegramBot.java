@@ -2,6 +2,7 @@ package ru.daniil.telegrambot.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.daniil.telegrambot.components.BotCommands;
+import ru.daniil.telegrambot.components.SendMessageComponent;
 import ru.daniil.telegrambot.config.BotConfig;
 import ru.daniil.telegrambot.models.User;
 import ru.daniil.telegrambot.service.DomainService;
@@ -27,18 +29,27 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
     private final UserService userService;
     private final MessageService messageService;
     private final DomainService domainService;
+    private final SendMessageComponent sendMessageComponent;
 
     @Autowired
-    public TelegramBot(BotConfig botConfig,
-                       UserService userService,
-                       MessageService messageService,
-                       DomainService domainService) {
+    public TelegramBot(
+            @Value("${bot.token}") String botToken,
+            BotConfig botConfig,
+            UserService userService,
+            MessageService messageService,
+            DomainService domainService,
+            SendMessageComponent sendMessageComponent)
+    {
+        super(botToken);
         this.botConfig = botConfig;
         this.userService = userService;
         this.messageService = messageService;
         this.domainService = domainService;
+        this.sendMessageComponent = sendMessageComponent;
         try {
-            this.execute(new SetMyCommands(BOT_COMMAND_LIST, new BotCommandScopeDefault(), null));
+            this.execute(
+                    new SetMyCommands(BOT_COMMAND_LIST, new BotCommandScopeDefault(), null)
+            );
         } catch (TelegramApiException e) {
             log.error("Error: " + e.getMessage());
         }
@@ -50,70 +61,64 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
     }
 
     @Override
-    public String getBotToken() {
-        return botConfig.getBotToken();
-    }
-
-    @Override
     public void onUpdateReceived(Update update) {
         long chatId = 0;
         String firstName = "";
         String receivedMessage = "";
 
-        Message infoMessage = update.getMessage();
-        if (update.hasMessage() && infoMessage.hasText()) {
-            chatId = infoMessage.getChatId();
-            firstName = infoMessage.getChat().getFirstName();
-            receivedMessage = infoMessage.getText();
+        Message message = update.getMessage();
+        if (update.hasMessage() && message.hasText()) {
+            chatId = message.getChatId();
+            firstName = message.getChat().getFirstName();
+            receivedMessage = message.getText();
         }
 
-        botAnswerUtils(infoMessage, chatId, firstName, receivedMessage);
+        botAnswerUtils(message, chatId, firstName, receivedMessage);
     }
 
-    private void botAnswerUtils(Message infoMessage, Long chatId, String firstName, String receivedMessage) {
-        SendMessage answer = null;
+    private void botAnswerUtils(
+            Message message,
+            Long chatId,
+            String firstName,
+            String receivedMessage)
+    {
         switch (receivedMessage) {
             case "/start":
-                createUser(infoMessage);
-                answer = startBot(chatId, firstName);
+                createUser(message);
+                sendMessage(chatId, (firstName + START_TEXT));
                 break;
-            case "/get":
+            case "/help":
+                sendMessage(chatId, HELP_TEXT);
                 break;
             default:
-                answer = sendMessage(chatId, DEFAULT_TEXT);
+                sendMessage(chatId, DEFAULT_TEXT);
                 break;
         }
-        createMessage(infoMessage, userService.getUser(chatId), answer);
+        createMessage(message);
     }
 
-    private void createUser(Message infoMessage) {
-        userService.createUser(infoMessage);
+    private void createUser(Message message) {
+        userService.createUser(message);
     }
 
-    private void createMessage(Message infoMessage, User user, SendMessage answer) {
-        messageService.createMessage(infoMessage, user, answer);
-    }
-
-    private SendMessage startBot(long chatId, String firstName) {
-        log.info("Replied to user: " + firstName);
-        return sendMessage(chatId, (firstName + START_TEXT));
-    }
-
-    private SendMessage sendMessage(long chatId, String message) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(message);
+    private void sendMessage(long chatId, String message) {
+        sendMessageComponent.saveMessage(chatId, message);
         try {
-            execute(sendMessage);
+            execute(sendMessageComponent.getSendMessage());
+            log.info("Replied message: " + message);
         } catch (TelegramApiException e) {
             log.error("Error: " + e.getMessage());
         }
-        return sendMessage;
+    }
+
+    private void createMessage(Message message) {
+        User user = userService.getUser(message.getChatId());
+        SendMessage answer = sendMessageComponent.getSendMessage();
+        messageService.createMessage(message, user, answer);
     }
 
     @Scheduled(cron = "${cron.scheduler}")
     private void createDomain() {
-        domainService.clearDomain();
         domainService.createDomain();
         mailingDomain();
     }

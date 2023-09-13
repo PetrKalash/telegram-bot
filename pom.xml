@@ -20,6 +20,7 @@
         <java.version>11</java.version>
         <telegram.version>6.8.0</telegram.version>
         <lombok.version>1.18.24</lombok.version>
+        <starterlogging.version>3.1.3</starterlogging.version>
         <jackson.version>2.15.2</jackson.version>
         <unirest.version>1.4.9</unirest.version>
         <liquibase.version>4.23.2</liquibase.version>
@@ -40,6 +41,13 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-logging -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+            <version>${starterlogging.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa -->

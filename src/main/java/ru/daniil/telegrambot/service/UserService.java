@@ -1,7 +1,6 @@
 package ru.daniil.telegrambot.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jvnet.hk2.annotations.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -10,7 +9,6 @@ import ru.daniil.telegrambot.repository.UserRepository;
 
 import java.util.Date;
 
-@Service
 @Component
 @Slf4j
 public class UserService {
@@ -31,10 +29,12 @@ public class UserService {
     }
 
     public Iterable<User> getAllUser() {
+        log.info("All users have been sent");
         return userRepository.findAll();
     }
 
     public User getUser(Long chatId) {
+        log.info("The user with the ID was sent");
         return userRepository.findById(chatId).orElse(null);
     }
 }
