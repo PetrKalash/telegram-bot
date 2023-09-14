@@ -25,7 +25,7 @@ s=50 и складывает в таблицу daily_domains (данные пр�
 
 Бот установлен на удаленный Linux-сервер и доступен по ссылке https://t.me/SpringSmartBot
 
-Таблица пользователей:\n
 ![image](https://github.com/PetrKalash/telegram-bot/assets/100221510/0ee7dc08-890f-4054-b5f0-8525bfec60fd)
-Таблица сообщений:\n
 ![image](https://github.com/PetrKalash/telegram-bot/assets/100221510/e887e079-7619-44b5-827d-4ed67128e5de)
+![image](https://github.com/PetrKalash/telegram-bot/assets/100221510/9b5bd8a5-e163-4f55-89c4-08ff19bd5842)
+![image](https://github.com/PetrKalash/telegram-bot/assets/100221510/57bf77b7-93cd-41d3-b47b-36e931331941)
