@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.daniil.telegrambot.models.Domain;
 
 @Repository
-public interface DomainRepository extends CrudRepository<Domain, Long> {
+public interface IDomainRepository extends CrudRepository<Domain, Long> {
 }

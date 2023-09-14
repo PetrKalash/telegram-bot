@@ -3,7 +3,6 @@ package ru.daniil.telegrambot.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,7 +16,6 @@ import ru.daniil.telegrambot.components.BotCommands;
 import ru.daniil.telegrambot.components.SendMessageComponent;
 import ru.daniil.telegrambot.config.BotConfig;
 import ru.daniil.telegrambot.models.User;
-import ru.daniil.telegrambot.service.DomainService;
 import ru.daniil.telegrambot.service.MessageService;
 import ru.daniil.telegrambot.service.UserService;
 
@@ -28,7 +26,6 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
     private final BotConfig botConfig;
     private final UserService userService;
     private final MessageService messageService;
-    private final DomainService domainService;
     private final SendMessageComponent sendMessageComponent;
 
     @Autowired
@@ -37,22 +34,13 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
             BotConfig botConfig,
             UserService userService,
             MessageService messageService,
-            DomainService domainService,
             SendMessageComponent sendMessageComponent)
     {
         super(botToken);
         this.botConfig = botConfig;
         this.userService = userService;
         this.messageService = messageService;
-        this.domainService = domainService;
         this.sendMessageComponent = sendMessageComponent;
-        try {
-            this.execute(
-                    new SetMyCommands(BOT_COMMAND_LIST, new BotCommandScopeDefault(), null)
-            );
-        } catch (TelegramApiException e) {
-            log.error("Error: " + e.getMessage());
-        }
     }
 
     @Override
@@ -62,18 +50,25 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
 
     @Override
     public void onUpdateReceived(Update update) {
-        long chatId = 0;
-        String firstName = "";
-        String receivedMessage = "";
-
+        botMenu();
         Message message = update.getMessage();
         if (update.hasMessage() && message.hasText()) {
-            chatId = message.getChatId();
-            firstName = message.getChat().getFirstName();
-            receivedMessage = message.getText();
-        }
+            long chatId = message.getChatId();
+            String firstName = message.getChat().getFirstName();
+            String receivedMessage = message.getText();
 
-        botAnswerUtils(message, chatId, firstName, receivedMessage);
+            botAnswerUtils(message, chatId, firstName, receivedMessage);
+        }
+    }
+
+    private void botMenu() {
+        try {
+            this.execute(
+                    new SetMyCommands(BOT_COMMAND_LIST, new BotCommandScopeDefault(), null)
+            );
+        } catch (TelegramApiException e) {
+            log.error("Error: " + e.getMessage());
+        }
     }
 
     private void botAnswerUtils(
@@ -82,26 +77,24 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
             String firstName,
             String receivedMessage)
     {
+        String text;
         switch (receivedMessage) {
             case "/start":
-                createUser(message);
-                sendMessage(chatId, (firstName + START_TEXT));
+                userService.createUser(message);
+                text = firstName + START_TEXT;
                 break;
             case "/help":
-                sendMessage(chatId, HELP_TEXT);
+                text = HELP_TEXT;
                 break;
             default:
-                sendMessage(chatId, DEFAULT_TEXT);
+                text = DEFAULT_TEXT;
                 break;
         }
-        createMessage(message);
+        sendMessage(text, chatId);
+        createMessage(message, chatId);
     }
 
-    private void createUser(Message message) {
-        userService.createUser(message);
-    }
-
-    private void sendMessage(long chatId, String message) {
+    public void sendMessage(String message, long chatId) {
         sendMessageComponent.saveMessage(chatId, message);
         try {
             execute(sendMessageComponent.getSendMessage());
@@ -111,22 +104,9 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
         }
     }
 
-    private void createMessage(Message message) {
-        User user = userService.getUser(message.getChatId());
+    private void createMessage(Message message, long chatId) {
+        User user = userService.getUser(chatId);
         SendMessage answer = sendMessageComponent.getSendMessage();
         messageService.createMessage(message, user, answer);
-    }
-
-    @Scheduled(cron = "${cron.scheduler}")
-    private void createDomain() {
-        domainService.createDomain();
-        mailingDomain();
-    }
-
-    private void mailingDomain() {
-        var users = userService.getAllUser();
-        for (User user : users) {
-            sendMessage(user.getChatId(), domainService.mailingDomain());
-        }
     }
 }

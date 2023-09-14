@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.daniil.telegrambot.models.Messages;
 
 @Repository
-public interface MessageRepository extends CrudRepository<Messages, Integer> {
+public interface IMessageRepository extends CrudRepository<Messages, Integer> {
 }

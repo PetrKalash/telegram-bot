@@ -18,5 +18,6 @@ public class SendMessageComponent  {
     public void saveMessage(long chatId, String message) {
         sendMessage.setChatId(chatId);
         sendMessage.setText(message);
+        log.info("The message sent by the bot has been saved");
     }
 }

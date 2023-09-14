@@ -5,17 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.daniil.telegrambot.models.User;
-import ru.daniil.telegrambot.repository.UserRepository;
+import ru.daniil.telegrambot.repository.IUserRepository;
 
 import java.util.Date;
 
 @Component
 @Slf4j
 public class UserService {
-    private final UserRepository userRepository;
+    private final IUserRepository userRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(IUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -24,8 +24,7 @@ public class UserService {
         user.setChatId(message.getChatId());
         user.setFirstName(message.getChat().getFirstName());
         user.setLastMessageAt(new Date());
-        userRepository.save(user);
-        log.info("User save: " + user);
+        saveUser(user);
     }
 
     public Iterable<User> getAllUser() {
@@ -36,5 +35,10 @@ public class UserService {
     public User getUser(Long chatId) {
         log.info("The user with the ID was sent");
         return userRepository.findById(chatId).orElse(null);
+    }
+
+    private void saveUser(User user) {
+        userRepository.save(user);
+        log.info("User save: " + user);
     }
 }

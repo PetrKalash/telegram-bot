@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.daniil.telegrambot.models.Domain;
-import ru.daniil.telegrambot.repository.DomainRepository;
+import ru.daniil.telegrambot.repository.IDomainRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,12 +21,12 @@ import java.util.List;
 public class DomainService {
     private static final String LINK_TO_DOMAINS =
             "https://backorder.ru/json/?order=desc&expired=1&by=hotness&page=1&item";
-    private final DomainRepository domainRepository;
+    private final IDomainRepository IDomainRepository;
     private final List<Domain> domainsList;
 
     @Autowired
-    public DomainService(DomainRepository domainRepository) {
-        this.domainRepository = domainRepository;
+    public DomainService(IDomainRepository IDomainRepository) {
+        this.IDomainRepository = IDomainRepository;
         this.domainsList = getDomain();
     }
 
@@ -50,7 +50,7 @@ public class DomainService {
 
     public void createDomain() {
         clearDomain();
-        domainRepository.saveAll(getDomain());
+        IDomainRepository.saveAll(getDomain());
         log.info("New domains have been uploaded");
     }
 
@@ -61,7 +61,7 @@ public class DomainService {
     }
 
     private void clearDomain() {
-        domainRepository.deleteAll();
+        IDomainRepository.deleteAll();
         log.info("All domains have been deleted");
     }
 }
