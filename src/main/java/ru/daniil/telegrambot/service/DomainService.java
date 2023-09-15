@@ -28,6 +28,7 @@ public class DomainService {
     public DomainService(IDomainRepository domainRepository) {
         this.domainRepository = domainRepository;
         this.domainsList = getDomain();
+        System.out.println(domainsList);
     }
 
     public List<Domain> getDomain() {

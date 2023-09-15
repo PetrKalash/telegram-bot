@@ -10,8 +10,6 @@ import java.util.Date;
 @Entity(name = "daily_domains")
 public class Domain {
     @Id
-    @GeneratedValue
-    private Integer id;
     @JsonProperty(value = "domainname")
     private String domainName;
     private Integer hotness;
