@@ -13,16 +13,6 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: block
-                  type: boolean
-                  constraints:
-                    nullable: false
-              - column:
-                  name: delete_date
-                  type: timestamp without time zone
-                  constraints:
-                    nullable: false
-              - column:
                   name: domain_name
                   type: character varying(255)
                   constraints:
@@ -33,40 +23,10 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: judicial
-                  type: boolean
-                  constraints:
-                    nullable: false
-              - column:
-                  name: links
-                  type: integer
-                  constraints:
-                    nullable: true
-              - column:
-                  name: old
-                  type: integer
-                  constraints:
-                    nullable: false
-              - column:
                   name: price
                   type: integer
                   constraints:
                     nullable: false
-              - column:
-                  name: registrar
-                  type: character varying(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: rkn
-                  type: boolean
-                  constraints:
-                    nullable: false
-              - column:
-                  name: visitors
-                  type: integer
-                  constraints:
-                    nullable: true
               - column:
                   name: x_value
                   type: double precision
@@ -77,3 +37,43 @@ databaseChangeLog:
                   type: integer
                   constraints:
                     nullable: true
+              - column:
+                  name: links
+                  type: integer
+                  constraints:
+                    nullable: true
+              - column:
+                  name: visitors
+                  type: integer
+                  constraints:
+                    nullable: true
+              - column:
+                  name: registrar
+                  type: character varying(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: old
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: delete_date
+                  type: timestamp without time zone
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rkn
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: judicial
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: block
+                  type: boolean
+                  constraints:
+                    nullable: false
