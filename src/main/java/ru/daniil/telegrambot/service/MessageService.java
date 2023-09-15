@@ -12,11 +12,11 @@ import ru.daniil.telegrambot.repository.IMessageRepository;
 @Component
 @Slf4j
 public class MessageService {
-    private final IMessageRepository IMessageRepository;
+    private final IMessageRepository messageRepository;
 
     @Autowired
-    public MessageService(IMessageRepository IMessageRepository) {
-        this.IMessageRepository = IMessageRepository;
+    public MessageService(IMessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
     }
 
     public void createMessage(Message message, User user, SendMessage answer) {
@@ -29,7 +29,7 @@ public class MessageService {
     }
 
     public void saveMessage(Messages messages) {
-        IMessageRepository.save(messages);
+        messageRepository.save(messages);
         log.info("The message was saved in the database");
     }
 }

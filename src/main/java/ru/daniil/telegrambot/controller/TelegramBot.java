@@ -95,7 +95,7 @@ public class TelegramBot extends TelegramLongPollingBot implements BotCommands {
     }
 
     public void sendMessage(String message, long chatId) {
-        sendMessageComponent.saveMessage(chatId, message);
+        sendMessageComponent.createSendMessage(chatId, message);
         try {
             execute(sendMessageComponent.getSendMessage());
             log.info("Replied message: " + message);

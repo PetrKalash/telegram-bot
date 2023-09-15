@@ -21,12 +21,12 @@ import java.util.List;
 public class DomainService {
     private static final String LINK_TO_DOMAINS =
             "https://backorder.ru/json/?order=desc&expired=1&by=hotness&page=1&item";
-    private final IDomainRepository IDomainRepository;
+    private final IDomainRepository domainRepository;
     private final List<Domain> domainsList;
 
     @Autowired
-    public DomainService(IDomainRepository IDomainRepository) {
-        this.IDomainRepository = IDomainRepository;
+    public DomainService(IDomainRepository domainRepository) {
+        this.domainRepository = domainRepository;
         this.domainsList = getDomain();
     }
 
@@ -50,7 +50,7 @@ public class DomainService {
 
     public void createDomain() {
         clearDomain();
-        IDomainRepository.saveAll(getDomain());
+        domainRepository.saveAll(getDomain());
         log.info("New domains have been uploaded");
     }
 
@@ -61,7 +61,7 @@ public class DomainService {
     }
 
     private void clearDomain() {
-        IDomainRepository.deleteAll();
+        domainRepository.deleteAll();
         log.info("All domains have been deleted");
     }
 }
